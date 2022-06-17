@@ -64,8 +64,15 @@ def main():
     browser = init_browser()
     wait = init_browser_wait(browser, WAIT_DELAY)
 
+    # open main page
     browser.get(args.url)
-    sleep(5)
+
+    # save cookie settings
+    save_settings_button = wait.until(EC.element_to_be_clickable(
+        (By.XPATH, "//button[@aria-label='Einstellungen speichern']")))
+    print('save settings button clickable')
+    save_settings_button.click()
+    print('save settings button clicked')
 
     close_browser(browser)
 
