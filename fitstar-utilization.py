@@ -13,7 +13,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
-
+from selenium.webdriver.remote.webelement import WebElement
 
 URL = 'https://www.fit-star.de'
 WAIT_DELAY = 20
@@ -68,7 +68,7 @@ def main():
     browser.get(args.url)
 
     # save cookie settings
-    save_settings_button = wait.until(EC.element_to_be_clickable(
+    save_settings_button: WebElement = wait.until(EC.element_to_be_clickable(
         (By.XPATH, "//button[@aria-label='Einstellungen speichern']")))
     print('save settings button clickable')
     save_settings_button.click()
