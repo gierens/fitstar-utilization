@@ -74,6 +74,16 @@ def main():
     save_settings_button.click()
     print('save settings button clicked')
 
+    # click studios dropdown
+    # Note that clicking this dropdown is actually not necessary, but
+    # we want to immitate a human user as closely as possible.
+    studios_downdown_trigger: WebElement = browser.find_element_by_xpath(
+        "//a[contains(@class, 'studios') and " +
+        "contains(@class, 'dropdownTrigger')]")
+    print('found studios downdown trigger')
+    studios_downdown_trigger.click()
+    print('open studios dropdown')
+
     close_browser(browser)
 
 
