@@ -84,6 +84,11 @@ def main():
     studios_downdown_trigger.click()
     print('open studios dropdown')
 
+    # find studio list
+    studios_row: WebElement = browser.find_element_by_xpath(
+        "//ul[contains(@class, 'row-studios')]")
+    print('found studio list')
+
     close_browser(browser)
 
 
