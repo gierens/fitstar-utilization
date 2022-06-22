@@ -88,7 +88,6 @@ def main():
     studios_row: WebElement = browser.find_element_by_xpath(
         "//ul[contains(@class, 'row-studios')]")
     print('found studio list')
-    print(type(studios_row))
 
     close_browser(browser)
 
