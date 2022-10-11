@@ -2,6 +2,7 @@
 # PYTHON_ARGCOMPLETE_OK
 
 from time import sleep
+from datetime import datetime
 import argparse
 import argcomplete
 import os
@@ -12,7 +13,7 @@ from selenium.common import exceptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from selenium.webdriver.remote.webelement import WebElement
 
 URL = 'https://www.fit-star.de'
@@ -112,12 +113,18 @@ def main():
                                                 for link in studio_links]))
 
     # loop through studio pages
-    main_tab_name = browser.window_handles[0]
+    main_tab_name: str = browser.window_handles[0]
     for studio_url in studio_urls:
-        studio_name = studio_url.split('/')[-1]
-        print(studio_name)
+        studio_name: str = studio_url.split('/')[-1]
         open_in_new_tab(browser, studio_name, studio_url)
-        sleep(1)
+        try:
+            utilization_text: WebElement = browser.find_element_by_xpath(
+                '//strong[@id="fs-livedata-percentage"]')
+            now = datetime.now()
+            print(studio_name, utilization_text.text, now)
+            # TODO insert data into InfluxDB
+        except NoSuchElementException:
+            print(f'{studio_name} no data')
         close_tab(browser, studio_name)
         switch_to_tab(browser, main_tab_name)
 
