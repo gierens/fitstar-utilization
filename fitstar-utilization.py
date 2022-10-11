@@ -33,18 +33,23 @@ def close_browser(browser):
     browser.quit()
 
 
-def create_new_tap(browser, name):
+def create_new_tab(browser, name):
     browser.execute_script(f"window.open('about:blank', '{name}');")
 
 
-def switch_to_tap(browser, name):
+def switch_to_tab(browser, name):
     browser.switch_to.window(name)
 
 
-def open_in_new_tap(browser, name, url):
-    create_new_tap(browser, name)
-    switch_to_tap(browser, name)
+def open_in_new_tab(browser, name, url):
+    create_new_tab(browser, name)
+    switch_to_tab(browser, name)
     browser.get(url)
+
+
+def close_tab(browser, name):
+    switch_to_tab(browser, name)
+    browser.close()
 
 
 def setup_parser():
