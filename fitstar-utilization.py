@@ -89,6 +89,11 @@ def main():
         "//ul[contains(@class, 'row-studios')]")
     print('found studio list')
 
+    # find studio links
+    studio_links: list[WebElement] = studios_row.find_elements_by_xpath('.//a')
+    studio_urls: list[str] = list(dict.fromkeys([link.get_attribute('href')
+                                                for link in studio_links]))
+
     close_browser(browser)
 
 
