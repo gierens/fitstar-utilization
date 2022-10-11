@@ -33,6 +33,20 @@ def close_browser(browser):
     browser.quit()
 
 
+def create_new_tap(browser, name):
+    browser.execute_script(f"window.open('about:blank', '{name}');")
+
+
+def switch_to_tap(browser, name):
+    browser.switch_to.window(name)
+
+
+def open_in_new_tap(browser, name, url):
+    create_new_tap(browser, name)
+    switch_to_tap(browser, name)
+    browser.get(url)
+
+
 def setup_parser():
     parser = argparse.ArgumentParser(
         description="""
