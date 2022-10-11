@@ -111,6 +111,16 @@ def main():
     studio_urls: list[str] = list(dict.fromkeys([link.get_attribute('href')
                                                 for link in studio_links]))
 
+    # loop through studio pages
+    main_tab_name = browser.window_handles[0]
+    for studio_url in studio_urls:
+        studio_name = studio_url.split('/')[-1]
+        print(studio_name)
+        open_in_new_tab(browser, studio_name, studio_url)
+        sleep(1)
+        close_tab(browser, studio_name)
+        switch_to_tab(browser, main_tab_name)
+
     close_browser(browser)
 
 
