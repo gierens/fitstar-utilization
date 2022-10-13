@@ -7,6 +7,9 @@ import argparse
 import argcomplete
 import os
 import sys
+from influxdb import InfluxDBClient
+from logging import (debug, info, error, warning, DEBUG, INFO, WARN, ERROR)
+from colorlog import ColoredFormatter, StreamHandler, getLogger
 
 from selenium import webdriver
 from selenium.common import exceptions
@@ -18,6 +21,13 @@ from selenium.webdriver.remote.webelement import WebElement
 
 URL = 'https://www.fit-star.de'
 WAIT_DELAY = 20
+
+LOG_LEVELS: dict[int, int] = {
+    0: ERROR,
+    1: WARN,
+    2: INFO,
+    3: DEBUG,
+}
 
 
 def init_browser():
@@ -53,6 +63,47 @@ def close_tab(browser, name):
     browser.close()
 
 
+def setup_logging(args: argparse.Namespace) -> None:
+    """
+    Setup the logging.
+
+    Parameters
+    ----------
+    args : argparse.Namespace
+        The argparse namespace containing the parsed arguments.
+
+    Returns
+    -------
+
+    See Also
+    --------
+
+    Example
+    -------
+    >>> setup_logging(args)
+    """
+    logformat = '%(log_color)s%(asctime)s %(levelname)-8s %(message)s'
+    formatter = ColoredFormatter(
+        logformat,
+        datefmt=None,
+        reset=True,
+        log_colors={
+            'DEBUG':    'cyan',
+            'INFO':     'green',
+            'WARNING':  'yellow',
+            'ERROR':    'red',
+            'CRITICAL': 'red,bg_white',
+        },
+        secondary_log_colors={},
+        style='%'
+    )
+    handler = StreamHandler()
+    handler.setFormatter(formatter)
+    logger = getLogger()
+    logger.addHandler(handler)
+    logger.setLevel(LOG_LEVELS[args.verbosity])
+
+
 def setup_parser():
     parser = argparse.ArgumentParser(
         description="""
@@ -67,6 +118,18 @@ def setup_parser():
                         default=URL,
                         help="URL of the FitStar website's main page",
                         )
+    # TODO filter studios
+    # TODO maybe argument for creating influxdb database
+    # TODO influxdb options
+    parser.add_argument('-v',
+                        '--verbose',
+                        dest='verbosity',
+                        action='count',
+                        default=0,
+                        help='''Verbosity, can be given multiple times to set
+                             the log level (0: error, 1: warn, 2: info, 3:
+                             debug)''',
+                        )
     return parser
 
 
@@ -80,6 +143,7 @@ def parse_args(parser):
 def main():
     parser = setup_parser()
     args = parse_args(parser)
+    setup_logging(args)
 
     browser = init_browser()
     wait = init_browser_wait(browser, WAIT_DELAY)
@@ -90,41 +154,44 @@ def main():
     # save cookie settings
     save_settings_button: WebElement = wait.until(EC.element_to_be_clickable(
         (By.XPATH, "//button[@aria-label='Einstellungen speichern']")))
-    print('save settings button clickable')
+    debug('save settings button clickable')
     save_settings_button.click()
-    print('save settings button clicked')
+    debug('save settings button clicked')
 
     # click studios dropdown
     studios_downdown_trigger: WebElement = browser.find_element_by_xpath(
         "//a[contains(@class, 'studios') and " +
         "contains(@class, 'dropdownTrigger')]")
-    print('found studios downdown trigger')
+    debug('found studios downdown trigger')
     studios_downdown_trigger.click()
-    print('open studios dropdown')
+    debug('open studios dropdown')
 
     # find studio list
     studios_row: WebElement = browser.find_element_by_xpath(
         "//ul[contains(@class, 'row-studios')]")
-    print('found studio list')
+    debug('found studio list')
 
     # find studio links
     studio_links: list[WebElement] = studios_row.find_elements_by_xpath('.//a')
     studio_urls: list[str] = list(dict.fromkeys([link.get_attribute('href')
                                                 for link in studio_links]))
+    debug('retrieve studio urls')
 
     # loop through studio pages
     main_tab_name: str = browser.window_handles[0]
     for studio_url in studio_urls:
         studio_name: str = studio_url.split('/')[-1]
+        debug(f'open studio site of {studio_name}')
         open_in_new_tab(browser, studio_name, studio_url)
         try:
             utilization_text: WebElement = browser.find_element_by_xpath(
                 '//strong[@id="fs-livedata-percentage"]')
             now = datetime.now()
-            print(studio_name, utilization_text.text, now)
+            info(f'{studio_name}: {utilization_text.text} at {now}')
             # TODO insert data into InfluxDB
         except NoSuchElementException:
-            print(f'{studio_name} no data')
+            warning(f'no data for {studio_name}')
+        debug(f'close studio site of {studio_name}')
         close_tab(browser, studio_name)
         switch_to_tab(browser, main_tab_name)
 
