@@ -118,7 +118,12 @@ def setup_parser():
                         default=URL,
                         help="URL of the FitStar website's main page",
                         )
-    # TODO filter studios
+    parser.add_argument('-f',
+                        '--filter',
+                        type=str,
+                        help=("Substring filter for the studio names" +
+                              " (examples: muenchen or berlin-moabit)"),
+                        )
     # TODO maybe argument for creating influxdb database
     # TODO influxdb options
     parser.add_argument('-v',
@@ -173,14 +178,19 @@ def main():
 
     # find studio links
     studio_links: list[WebElement] = studios_row.find_elements_by_xpath('.//a')
+    debug('retrieved studio urls')
     studio_urls: list[str] = list(dict.fromkeys([link.get_attribute('href')
                                                 for link in studio_links]))
-    debug('retrieve studio urls')
+    studio_names: list[str] = [studio_url.split('/')[-1]
+                               for studio_url in studio_urls]
+    studios = dict(zip(studio_names, studio_urls))
 
     # loop through studio pages
     main_tab_name: str = browser.window_handles[0]
-    for studio_url in studio_urls:
-        studio_name: str = studio_url.split('/')[-1]
+    for studio_name, studio_url in studios.items():
+        if args.filter and args.filter not in studio_name:
+            info(f"skipping studio {studio_name} due to filter")
+            continue
         debug(f'open studio site of {studio_name}')
         open_in_new_tab(browser, studio_name, studio_url)
         try:
