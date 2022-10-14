@@ -112,7 +112,7 @@ def setup_parser():
         """,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
-    parser.add_argument('-u',
+    parser.add_argument('-U',
                         '--url',
                         type=str,
                         default=URL,
@@ -125,7 +125,40 @@ def setup_parser():
                               " (examples: muenchen or berlin-moabit)"),
                         )
     # TODO maybe argument for creating influxdb database
-    # TODO influxdb options
+    parser.add_argument('-H',
+                        '--host',
+                        type=str,
+                        default='localhost',
+                        help="InfluxDB hostname, FQDN or IP address",
+                        )
+    parser.add_argument('-P',
+                        '--port',
+                        type=int,
+                        default=8086,
+                        help="InfluxDB port",
+                        )
+    parser.add_argument('-u',
+                        '--username',
+                        type=str,
+                        default='root',
+                        help="InfluxDB username",
+                        )
+    parser.add_argument('-p',
+                        '--password',
+                        type=str,
+                        default='root',
+                        help="InfluxDB password",
+                        )
+    parser.add_argument('-S',
+                        '--ssl',
+                        action='store_true',
+                        help="Use SSL for InfluxDB connection",
+                        )
+    parser.add_argument('-V',
+                        '--verify-ssl',
+                        action='store_true',
+                        help="Verify SSL certificate for InfluxDB connection",
+                        )
     parser.add_argument('-v',
                         '--verbose',
                         dest='verbosity',
@@ -150,6 +183,29 @@ def main():
     args = parse_args(parser)
     setup_logging(args)
 
+    # connect to InfluxDB
+    try:
+        influx = InfluxDBClient(host=args.host,
+                                port=args.port,
+                                username=args.username,
+                                password=args.password,
+                                ssl=args.ssl,
+                                verify_ssl=args.verify_ssl,
+                                )
+    except Exception as e:
+        error(f"Could not connect to InfluxDB: {e}")
+        sys.exit(1)
+
+    # create and switch to database
+    # this also checks if we are properly connected and authorized
+    try:
+        influx.create_database('fitstar')
+        influx.switch_database('fitstar')
+    except Exception as e:
+        error(f"Could not create or switch to database: {e}")
+        sys.exit(1)
+
+    # initialize browser
     browser = init_browser()
     wait = init_browser_wait(browser, WAIT_DELAY)
 
@@ -186,6 +242,7 @@ def main():
     studios = dict(zip(studio_names, studio_urls))
 
     # loop through studio pages
+    data = []
     main_tab_name: str = browser.window_handles[0]
     for studio_name, studio_url in studios.items():
         if args.filter and args.filter not in studio_name:
@@ -196,16 +253,27 @@ def main():
         try:
             utilization_text: WebElement = browser.find_element_by_xpath(
                 '//strong[@id="fs-livedata-percentage"]')
+            utilization = int(utilization_text.text.replace('%', ''))
             now = datetime.now()
-            info(f'{studio_name}: {utilization_text.text} at {now}')
-            # TODO insert data into InfluxDB
+            timestamp = round(now.timestamp())
+            info(f'{studio_name}: {utilization}% at {now}')
+            data.append(f'utilization,studio={studio_name} ' +
+                        f'utilization={utilization} {timestamp}')
         except NoSuchElementException:
             warning(f'no data for {studio_name}')
         debug(f'close studio site of {studio_name}')
         close_tab(browser, studio_name)
         switch_to_tab(browser, main_tab_name)
 
+    # close browser
     close_browser(browser)
+
+    # insert data into InfluxDB
+    influx.write_points(data, time_precision='s', protocol='line',
+                        batch_size=10000)
+
+    # close InfluxDB connection
+    influx.close()
 
 
 if __name__ == '__main__':
