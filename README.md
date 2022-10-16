@@ -53,7 +53,8 @@ I myself run the script on a
 in an [XRDP](http://xrdp.org/) session.
 
 ## Grafana Dashboard
-The Grafana dashboard can be directly imported from the Grafana webpage:
+The Grafana dashboard can be directly imported into Grafana with its
+ID `17196`, the corresponding webpage is:
 https://grafana.com/grafana/dashboards/17196
 
 ## License
