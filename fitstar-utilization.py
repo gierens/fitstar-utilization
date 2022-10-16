@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
 # PYTHON_ARGCOMPLETE_OK
 
-from time import sleep
 from datetime import datetime
 import argparse
 import argcomplete
-import os
 import sys
 from influxdb import InfluxDBClient
 from logging import (debug, info, error, warning, DEBUG, INFO, WARN, ERROR)
 from colorlog import ColoredFormatter, StreamHandler, getLogger
 
 from selenium import webdriver
-from selenium.common import exceptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import TimeoutException, NoSuchElementException
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.remote.webelement import WebElement
 
 URL = 'https://www.fit-star.de'
