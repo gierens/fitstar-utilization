@@ -54,8 +54,8 @@ in an [XRDP](http://xrdp.org/) session.
 
 ## Grafana Dashboard
 The Grafana dashboard can be directly imported into Grafana with its
-ID `17196`, the corresponding webpage is:
-https://grafana.com/grafana/dashboards/17196
+ID `17200`, the corresponding webpage is:
+https://grafana.com/grafana/dashboards/17200
 
 ## License
 This project is distributed under [MIT](LICENSE) license.
