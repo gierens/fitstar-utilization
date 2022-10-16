@@ -46,7 +46,7 @@ in an [XRDP](http://xrdp.org/) session.
 
 ## Grafana Dashboard
 The Grafana dashboard can be directly imported from the Grafana webpage:
-https://grafana.com/grafana/dashboards/17192
+https://grafana.com/grafana/dashboards/17196
 
 ## License
 This project is distributed under [MIT](LICENSE) license.
