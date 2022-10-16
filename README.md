@@ -35,6 +35,15 @@ To fetch the data for all studios in Munich and insert them into a given
 ```
 For further information refer to the `-h/--help` option.
 
+Note that because of Selenium requiring a browser, the script needs to run in
+the presence of the graphical session. In case you run this over SSH or as
+cron job, you need to set the `DISPLAY` variable. You can use the `w` command
+to list active X sessions.
+
+I myself run the script on a
+[Raspberry Pi 4 Model B](https://www.raspberrypi.com/products/raspberry-pi-4-model-b/)
+in an [XRDP](http://xrdp.org/) session.
+
 ## Grafana Dashboard
 The Grafana dashboard can be directly imported from the Grafana webpage:
 https://grafana.com/grafana/dashboards/17192
