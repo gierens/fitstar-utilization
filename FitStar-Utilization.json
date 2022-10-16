@@ -357,6 +357,7 @@
         "y": 17
       },
       "id": 6,
+      "interval": "300",
       "maxDataPoints": 200,
       "options": {
         "calculate": false,
@@ -513,6 +514,6 @@
   "timezone": "",
   "title": "FitStar Utilization",
   "uid": "qq0XN2SVk",
-  "version": 16,
+  "version": 18,
   "weekStart": ""
 }
