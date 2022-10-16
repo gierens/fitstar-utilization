@@ -1,0 +1,5 @@
+argparse
+argcomplete
+influxdb
+colorlog
+selenium
