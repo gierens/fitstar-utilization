@@ -7,6 +7,14 @@ dashboard for visualization.
 
 ![Fit Star Utilization Dashboard](dashboard.png)
 
+## Demo
+Instead of setting this up yourself, you can also simply access
+an instance of the dashboard I host myself
+[here](https://grafana-public.schollheim.net/d/qq0XN2SVk/fitstar-utilization).
+I also intend make the
+[InfluxDB](https://www.influxdata.com/)
+that feeds this publicly accessible when I find the time.
+
 ## Python Script
 The script uses [Selenium](https://www.selenium.dev/)
 to automatically retrieve the utilization data from the Fit Star studio
