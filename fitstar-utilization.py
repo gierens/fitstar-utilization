@@ -122,6 +122,13 @@ def setup_parser():
                               " (examples: muenchen or berlin-moabit)"),
                         )
     # TODO maybe argument for creating influxdb database
+    parser.add_argument('-n',
+                        '--no-influx',
+                        dest='influx',
+                        action='store_false',
+                        default=True,
+                        help="Do not write data to InfluxDB",
+                        )
     parser.add_argument('-H',
                         '--host',
                         type=str,
@@ -180,27 +187,28 @@ def main():
     args = parse_args(parser)
     setup_logging(args)
 
-    # connect to InfluxDB
-    try:
-        influx = InfluxDBClient(host=args.host,
-                                port=args.port,
-                                username=args.username,
-                                password=args.password,
-                                ssl=args.ssl,
-                                verify_ssl=args.verify_ssl,
-                                )
-    except Exception as e:
-        error(f"Could not connect to InfluxDB: {e}")
-        sys.exit(1)
+    if args.influx:
+        # connect to InfluxDB
+        try:
+            influx = InfluxDBClient(host=args.host,
+                                    port=args.port,
+                                    username=args.username,
+                                    password=args.password,
+                                    ssl=args.ssl,
+                                    verify_ssl=args.verify_ssl,
+                                    )
+        except Exception as e:
+            error(f"Could not connect to InfluxDB: {e}")
+            sys.exit(1)
 
-    # create and switch to database
-    # this also checks if we are properly connected and authorized
-    try:
-        influx.create_database('fitstar')
-        influx.switch_database('fitstar')
-    except Exception as e:
-        error(f"Could not create or switch to database: {e}")
-        sys.exit(1)
+        # create and switch to database
+        # this also checks if we are properly connected and authorized
+        try:
+            influx.create_database('fitstar')
+            influx.switch_database('fitstar')
+        except Exception as e:
+            error(f"Could not create or switch to database: {e}")
+            sys.exit(1)
 
     # initialize browser
     browser = init_browser()
@@ -265,12 +273,13 @@ def main():
     # close browser
     close_browser(browser)
 
-    # insert data into InfluxDB
-    influx.write_points(data, time_precision='s', protocol='line',
-                        batch_size=10000)
+    if args.influx:
+        # insert data into InfluxDB
+        influx.write_points(data, time_precision='s', protocol='line',
+                            batch_size=10000)
 
-    # close InfluxDB connection
-    influx.close()
+        # close InfluxDB connection
+        influx.close()
 
 
 if __name__ == '__main__':
