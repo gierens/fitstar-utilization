@@ -225,7 +225,7 @@ def main():
     debug('save settings button clicked')
 
     # click studios dropdown
-    studios_downdown_trigger: WebElement = browser.find_element_by_xpath(
+    studios_downdown_trigger: WebElement = browser.find_element('xpath',
         "//a[contains(@class, 'studios') and " +
         "contains(@class, 'dropdownTrigger')]")
     debug('found studios downdown trigger')
@@ -233,12 +233,12 @@ def main():
     debug('open studios dropdown')
 
     # find studio list
-    studios_row: WebElement = browser.find_element_by_xpath(
+    studios_row: WebElement = browser.find_element('xpath',
         "//ul[contains(@class, 'row-studios')]")
     debug('found studio list')
 
     # find studio links
-    studio_links: list[WebElement] = studios_row.find_elements_by_xpath('.//a')
+    studio_links: list[WebElement] = studios_row.find_elements('xpath','.//a')
     debug('retrieved studio urls')
     studio_urls: list[str] = list(dict.fromkeys([link.get_attribute('href')
                                                 for link in studio_links]))
@@ -256,7 +256,7 @@ def main():
         debug(f'open studio site of {studio_name}')
         open_in_new_tab(browser, studio_name, studio_url)
         try:
-            utilization_text: WebElement = browser.find_element_by_xpath(
+            utilization_text: WebElement = browser.find_element('xpath',
                 '//strong[@id="fs-livedata-percentage"]')
             utilization = int(utilization_text.text.replace('%', ''))
             now = datetime.now()
